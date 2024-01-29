@@ -1,0 +1,24 @@
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.detailText {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detailTitle {
+  color: gray;
+  font-weight: bold;
+}
+
+.detailValue {
+  font-weight: 500;
+}
+
+.detail {
+  display: flex;
+  gap: 20px;
+}
