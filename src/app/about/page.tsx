@@ -1,5 +1,11 @@
 import Image from "next/image";
 import s from "./about.module.css";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About page",
+  description: "Next about page description",
+};
 
 const About = () => {
   return (
@@ -11,7 +17,7 @@ const About = () => {
         </h1>
         <p className={s.desc}>
           We create digital ideas that are bigger, bolder, braver and better. We
-          believe in good ideas flexibility and precission We're world's Out
+          believe in good ideas flexibility and precission We&apos;re world&apos;s Out
           Special Team best consultng & finance solution provider. Wide range of
           web and software development and services.
         </p>

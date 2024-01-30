@@ -1,14 +1,32 @@
 import Image from "next/image";
-import { getPost } from "../../../../lib/data";
-import s from "./SinglePost.module.css";
 import { Suspense } from "react";
 import PostUser from "@/components/PostUser/PostUser";
+import s from "./SinglePost.module.css";
 
 interface Props {
   params: {
     slug: string;
   };
 }
+
+const getPost = async (slug: string) => {
+  const response = await fetch(`http://localhost:3000/api/blog/${slug}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch post");
+  }
+  return response.json();
+}
+
+export const generateMetadata = async ({ params }: Props) => {
+  const { slug } = params;
+  const post = await getPost(slug);
+  return {
+    title: post.title,
+    description: post.desc,
+  };
+};
+
+
 
 const SinglePost = async ({ params }: Props) => {
   const { slug } = params;
