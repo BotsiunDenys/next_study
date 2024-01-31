@@ -4,6 +4,8 @@ import Link from "next/link";
 import s from "./Links.module.css";
 import { useState } from "react";
 import Image from "next/image";
+import { handleLogout } from "../../../../lib/action";
+import { Session } from "next-auth";
 
 const links = [
   { name: "Homepage", path: "/" },
@@ -12,11 +14,13 @@ const links = [
   { name: "Blog", path: "/blog" },
 ];
 
-const Links = () => {
+interface Props {
+  session: Session | null;
+}
+
+const Links = ({ session }: Props) => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const session = true;
-  const isAdmin = true;
 
   return (
     <div className={s.container}>
@@ -30,9 +34,9 @@ const Links = () => {
             {link.name}
           </Link>
         ))}
-        {session ? (
+        {session?.user ? (
           <>
-            {isAdmin && (
+            {session?.user && (
               <Link
                 className={`${s.link} ${pathname === "/admin" && s.active}`}
                 href="/admin"
@@ -40,7 +44,9 @@ const Links = () => {
                 Admin
               </Link>
             )}
-            <button className={s.logout}>Logout</button>
+            <form action={handleLogout}>
+              <button className={s.logout}>Logout</button>
+            </form>
           </>
         ) : (
           <Link
@@ -70,9 +76,9 @@ const Links = () => {
               {link.name}
             </Link>
           ))}
-          {session ? (
+          {session?.user ? (
             <>
-              {isAdmin && (
+              {session.user && (
                 <Link
                   className={`${s.link} ${pathname === "/admin" && s.active}`}
                   href="/admin"
@@ -80,7 +86,9 @@ const Links = () => {
                   Admin
                 </Link>
               )}
-              <button className={s.logout}>Logout</button>
+              <form action={handleLogout}>
+                <button className={s.logout}>Logout</button>
+              </form>
             </>
           ) : (
             <Link

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import s from "./PostUser.module.css";
-import { getUser } from "../../../lib/data";
+import { getUser } from "../../../lib/action";
 
 interface Props {
   userId: string;
