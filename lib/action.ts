@@ -57,38 +57,51 @@ export const handleLogout = async () => {
   await signOut();
 };
 
-export const register = async (formData: FormData) => {
+export const register = async (
+  _previousState: { error: string; success: boolean },
+  formData: FormData
+) => {
   const { username, email, password, passwordRepeat } =
     Object.fromEntries(formData);
   if (password !== passwordRepeat) {
-    return "Passwords do not match";
+    return { error: "Passwords do not match", success: false };
   }
   try {
     connectToDb();
     const user = await User.findOne({ username });
     if (typeof password !== "string") {
-      return "Invalid password";
+      return { error: "Invalid password", success: false };
     }
     if (user) {
-      return "User already exists";
+      return { error: "User already exists", success: false };
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = new User({ username, email, password: hashedPassword });
     await newUser.save();
     console.log("saved to db");
+
+    return { success: true, error: "" };
   } catch (e) {
     console.log(e);
-    return { error: "Something went wrong" };
+    return { error: "Something went wrong", success: false };
   }
 };
 
-export const login = async (formData: FormData) => {
+export const login = async (
+  _previousState: { error: string; success: boolean },
+  formData: FormData
+) => {
   const { username, password } = Object.fromEntries(formData);
   try {
     await signIn("credentials", { username, password });
-  } catch (e) {
+    return { success: true, error: "" };
+  } catch (e: any) {
     console.log(e);
-    return { error: "Something went wrong" };
+    
+    if (e.message.includes("CredentialsSignin")) {
+      return { error: "Wrong credentials", success: false };
+    }
+    return { error: "Something went wrong", success: false };
   }
 };

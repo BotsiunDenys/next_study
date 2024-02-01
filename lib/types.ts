@@ -13,4 +13,5 @@ export interface UserType {
   img?: string;
   email: string;
   isAdmin: boolean;
+  password: string;
 }

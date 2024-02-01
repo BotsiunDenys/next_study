@@ -2,6 +2,7 @@ import NextAuth, { Account, Profile, User } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { User as UserModel } from "./models";
+import { UserType } from "./types";
 import { connectToDb } from "./utils";
 import bcrypt from "bcrypt";
 
@@ -10,32 +11,6 @@ interface SignInParams {
   account: Account | null;
   profile?: Profile | undefined;
 }
-
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
-const login = async (credentials: LoginCredentials) => {
-  try {
-    connectToDb();
-    const user = await UserModel.findOne({ username: credentials.username });
-    if (!user) {
-      throw new Error("Wrong credentials");
-    }
-    const isPasswordCorrect = await bcrypt.compare(
-      credentials.password,
-      user.password
-    );
-    if (!isPasswordCorrect) {
-      throw new Error("Wrong credentials");
-    }
-    return user;
-  } catch (e) {
-    console.log(e);
-    throw new Error("Failed to login");
-  }
-};
 
 export const {
   handlers: { GET, POST },
@@ -49,9 +24,26 @@ export const {
       clientSecret: process.env.GITHUB_SECRET,
     }),
     CredentialsProvider({
-      async authorize(credentials: LoginCredentials, request) {
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, _request) {
         try {
-          const user = await login(credentials);
+          connectToDb();
+          const user = await UserModel.findOne<UserType>({
+            username: credentials.username,
+          });
+          if (!user) {
+            throw new Error("Wrong credentials");
+          }
+          const isPasswordCorrect = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          );
+          if (!isPasswordCorrect) {
+            throw new Error("Wrong credentials");
+          }
           return user;
         } catch (e) {
           console.log(e);
@@ -65,7 +57,7 @@ export const {
       if (params.account?.provider === "github") {
         connectToDb();
         try {
-          const user = await UserModel.findOne({
+          const user = await UserModel.findOne<UserType>({
             email: params.profile?.email,
           });
 
