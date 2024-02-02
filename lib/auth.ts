@@ -5,6 +5,7 @@ import { User as UserModel } from "./models";
 import { UserType } from "./types";
 import { connectToDb } from "./utils";
 import bcrypt from "bcrypt";
+import { authConfig } from "./auth.config";
 
 interface SignInParams {
   user: User;
@@ -18,6 +19,7 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  ...authConfig,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID,
@@ -28,12 +30,13 @@ export const {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, _request) {
+      async authorize(credentials) {
         try {
           connectToDb();
           const user = await UserModel.findOne<UserType>({
             username: credentials.username,
           });
+          
           if (!user) {
             throw new Error("Wrong credentials");
           }
@@ -44,6 +47,7 @@ export const {
           if (!isPasswordCorrect) {
             throw new Error("Wrong credentials");
           }
+          
           return user;
         } catch (e) {
           console.log(e);
@@ -77,5 +81,6 @@ export const {
       }
       return true;
     },
+    ...authConfig.callbacks,
   },
 });
